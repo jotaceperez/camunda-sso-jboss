@@ -220,4 +220,59 @@
             <uniqueVersion>true</uniqueVersion>
         </snapshotRepository>
     </distributionManagement>
+
+    <profiles>
+        <profile>
+            <!-- Usage: mvn clean wildfly:run -Ptest-wildfly
+                 the open your browser at: http://localhost:8080/camunda/
+                 and login with demo:notdemo -->
+            <id>test-wildfly</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>unpack</id>
+                                <phase>generate-test-resources</phase>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>org.camunda.bpm.wildfly</groupId>
+                                            <artifactId>camunda-bpm-wildfly10</artifactId>
+                                            <version>${camunda.version}</version>
+                                            <type>zip</type>
+                                            <overWrite>false</overWrite>
+                                            <outputDirectory>${project.build.directory}/camunda-bpm-wildfly10-${camunda.version}</outputDirectory>
+                                            <excludes>**/camunda-webapp-jboss-${camunda.version}.war</excludes>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.wildfly.plugins</groupId>
+                        <artifactId>wildfly-maven-plugin</artifactId>
+                        <version>1.2.1.Final</version>
+                        <configuration>
+                            <jbossHome>${project.build.directory}/camunda-bpm-wildfly10-${camunda.version}/server/wildfly-10.1.0.Final</jbossHome>
+                            <add-user>
+                                <users>
+                                    <user>
+                                        <username>demo</username>
+                                        <password>notdemo</password>
+                                        <applicationUser>true</applicationUser>
+                                    </user>
+                                </users>
+                            </add-user>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
