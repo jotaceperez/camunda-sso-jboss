@@ -242,12 +242,12 @@
                                     <artifactItems>
                                         <artifactItem>
                                             <groupId>org.camunda.bpm.wildfly</groupId>
-                                            <artifactId>camunda-bpm-wildfly10</artifactId>
+                                            <artifactId>camunda-bpm-ee-wildfly10</artifactId>
                                             <version>${camunda.version}</version>
                                             <type>zip</type>
                                             <overWrite>false</overWrite>
-                                            <outputDirectory>${project.build.directory}/camunda-bpm-wildfly10-${camunda.version}</outputDirectory>
-                                            <excludes>**/camunda-webapp-jboss-${camunda.version}.war</excludes>
+                                            <outputDirectory>${project.build.directory}/camunda-bpm-ee-wildfly10-${camunda.version}</outputDirectory>
+                                            <excludes>**/camunda-webapp-ee-jboss-${camunda.version}.war</excludes>
                                         </artifactItem>
                                     </artifactItems>
                                 </configuration>
@@ -259,7 +259,7 @@
                         <artifactId>wildfly-maven-plugin</artifactId>
                         <version>1.2.1.Final</version>
                         <configuration>
-                            <jbossHome>${project.build.directory}/camunda-bpm-wildfly10-${camunda.version}/server/wildfly-10.1.0.Final</jbossHome>
+                            <jbossHome>${project.build.directory}/camunda-bpm-ee-wildfly10-${camunda.version}/server/wildfly-10.1.0.Final</jbossHome>
                             <add-user>
                                 <users>
                                     <user>
