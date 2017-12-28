@@ -2,6 +2,7 @@ package de.novatec.bpm.webapp.impl.security.auth;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.util.logging.Logger;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -12,47 +13,63 @@ import javax.servlet.http.HttpServletRequest;
 import org.camunda.bpm.webapp.impl.security.SecurityActions;
 import org.camunda.bpm.webapp.impl.security.SecurityActions.SecurityAction;
 import org.camunda.bpm.webapp.impl.security.auth.Authentication;
+import org.camunda.bpm.webapp.impl.security.auth.AuthenticationFilter;
 import org.camunda.bpm.webapp.impl.security.auth.Authentications;
 import org.camunda.bpm.webapp.impl.security.auth.UserAuthenticationResource;
 
 /**
- * This security filter maps the user provided by the application server
- * to the Camunda user and group management.
+ * This Servlet filter relies on the Servlet container (application server) to
+ * authenticate a user and only forward a request to the application upon
+ * successful authentication.
  * 
- * It is largely based on code from {@link org.camunda.bpm.webapp.impl.security.auth.AuthenticationFilter}
- * and {@link UserAuthenticationResource}. 
+ * It passes the username provided by the container through the Servlet API into
+ * the Servlet session used by the Camunda REST API.
+ *
+ * The implementation is largely based on code from {@link AuthenticationFilter}
+ * and {@link UserAuthenticationResource}.
  *
  * @author Eberhard Heber
  * @author Falko Menge
  */
-public class AuthenticationFilter extends org.camunda.bpm.webapp.impl.security.auth.AuthenticationFilter {
+public class ContainerBasedUserAuthenticationFilter extends AuthenticationFilter {
 
-    private static final String APP_MARK = "/app/";
+    protected static final String APP_MARK = "/app/";
 
-    protected void setKnownPrinicipal(final ServletRequest request, Authentications authentications) {
-        final HttpServletRequest req = (HttpServletRequest) request;
+    private final Logger LOGGER = Logger.getLogger(ContainerBasedUserAuthenticationFilter.class.getName());
 
-        Principal principal = req.getUserPrincipal();
-        if (principal != null && principal.getName() != null && !principal.getName().isEmpty()) {
-            for (Authentication aut : authentications.getAuthentications()) {
-                if (aut.getName() == principal.getName()) {
-                    // already in the list - nothing to do
-//                    System.out.println(((HttpServletRequest) request).getSession().getId() + " already authorized.");
-                    return;
-                }
-            }
-            String url = req.getRequestURL().toString();
-            String[] appInfo = getAppInfo(url);
-
-            String engineName = getEngineName(appInfo);
-            String username = principal.getName();
-
-            new ContainerBasedUserAuthenticationResource().doLogin(engineName, username, authentications);
-            
-//            System.out.println(((HttpServletRequest) request).getSession().getId() + " " + username + " " + engineName);
-//        } else {
-//          System.out.println(((HttpServletRequest) request).getSession().getId() + " no user provided from application server!");
+    protected void setKnownPrinicipal(final HttpServletRequest request, Authentications authentications) {
+      String username = getUserName(request);
+      if (username != null && !username.isEmpty()) {
+        for (Authentication auth : authentications.getAuthentications()) {
+          if (username.equals(auth.getName())) {
+            // already in the list - nothing to do
+            LOGGER.fine(request.getSession().getId() + " already authorized.");
+            return;
+          }
         }
+        String engineName = getEngineName(request);
+        
+        doLogin(authentications, username, engineName);
+        
+        LOGGER.fine(request.getSession().getId() + " " + username + " " + engineName);
+      } else {
+        LOGGER.fine(request.getSession().getId() + " no user provided from application server!");
+      }
+    }
+
+    protected void doLogin(Authentications authentications, String username, String engineName) {
+      new ContainerBasedUserAuthenticationResource().doLogin(engineName, username, authentications);
+    }
+
+    protected String getUserName(final HttpServletRequest request) {
+      Principal principal = request.getUserPrincipal();
+      return principal != null ? principal.getName() : null;
+    }
+
+    protected String getEngineName(final HttpServletRequest request) {
+      String url = request.getRequestURL().toString();
+      String[] appInfo = getAppInfo(url);
+      return getEngineName(appInfo);
     }
 
     protected String getEngineName(String[] appInfo) {
@@ -108,7 +125,7 @@ public class AuthenticationFilter extends org.camunda.bpm.webapp.impl.security.a
 
         // get authentication from session
         Authentications authentications = Authentications.getFromSession(req.getSession());
-        setKnownPrinicipal(request, authentications);
+        setKnownPrinicipal(req, authentications);
         Authentications.setCurrent(authentications);
         try {
 
