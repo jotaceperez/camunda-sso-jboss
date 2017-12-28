@@ -265,10 +265,16 @@
                                     <user>
                                         <username>demo</username>
                                         <password>notdemo</password>
+                                        <groups>
+                                        	<group>sales</group>
+                                        </groups>
                                         <applicationUser>true</applicationUser>
                                     </user>
                                 </users>
                             </add-user>
+                            <java-opts>
+                            	<java-opt>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=8787</java-opt>
+                            </java-opts>
                         </configuration>
                     </plugin>
                 </plugins>
