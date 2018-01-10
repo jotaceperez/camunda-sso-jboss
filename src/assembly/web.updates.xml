@@ -21,10 +21,8 @@
 </security-constraint>
 
 <login-config>
-        <auth-method>SPNEGO</auth-method>
-        <realm-name>SPNEGO</realm-name>
-        <form-login-config>
-        </form-login-config>
+	<auth-method>KEYCLOAK</auth-method>
+        <realm-name>this is ignored currently</realm-name>
 </login-config>
 
 <security-role>
