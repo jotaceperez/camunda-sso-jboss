@@ -1,14 +1,11 @@
 package de.novatec.bpm.webapp.impl.security.auth;
 
-import java.security.AccessControlContext;
-import java.security.AccessController;
-import java.security.Principal;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
-import javax.security.auth.Subject;
+import javax.servlet.http.HttpServletRequest;
 
+import org.camunda.bpm.engine.identity.Group;
 import org.camunda.bpm.webapp.impl.security.auth.Authentications;
 
 /**
@@ -26,25 +23,28 @@ import org.camunda.bpm.webapp.impl.security.auth.Authentications;
 public class ContainerBasedUserAndGroupsAuthenticationFilter extends ContainerBasedUserAuthenticationFilter {
 
   @Override
-  protected void doLogin(Authentications authentications, String username, String engineName) {
-    // initialize with null, to allow fall back to identity service, if nothing provided by container
-    List<String> groupIds = null;
+  protected void doLogin(Authentications authentications, String username, String engineName, HttpServletRequest request) {
+    new ContainerBasedUserAuthenticationResource() {
 
-    // get user's groups
-    AccessControlContext acc = AccessController.getContext();
-    Subject subject = Subject.getSubject(acc);
-    if (subject != null) {
-      Set<Principal> groupPrincipals = subject.getPrincipals();
-      if (groupPrincipals != null && !groupPrincipals.isEmpty()) {
-        // transform into array of strings:
-        groupIds = new ArrayList<String>();
-        for (Principal groupPrincipal : groupPrincipals) {
-          groupIds.add(groupPrincipal.getName());
-        }
+      public ContainerBasedUserAuthenticationResource setRequest(HttpServletRequest request) {
+        this.request = request;
+        return this;
       }
-    }
 
-    new ContainerBasedUserAuthenticationResource().doLogin(engineName, username, authentications, groupIds);
+      protected List<String> getGroupsOfUser(org.camunda.bpm.engine.ProcessEngine engine, String userId) {
+        List<String> groupIds = new LinkedList<String>();
+
+        // ouch - but servlet API has no getGroups(), for that one has to cast
+        // to (internal) implementation of Principal
+        for (Group group : engine.getIdentityService().createGroupQuery().list()) {
+          if (request.isUserInRole(group.getId())) {
+            groupIds.add(group.getId());
+          }
+        }
+
+        return groupIds;
+      };
+    }.setRequest(request).doLogin(engineName, username, authentications);
   }
 
 }

@@ -38,6 +38,7 @@ public class ContainerBasedUserAuthenticationFilter extends AuthenticationFilter
     private final Logger LOGGER = Logger.getLogger(ContainerBasedUserAuthenticationFilter.class.getName());
 
     protected void setKnownPrinicipal(final HttpServletRequest request, Authentications authentications) {
+      
       String username = getUserName(request);
       if (username != null && !username.isEmpty()) {
         for (Authentication auth : authentications.getAuthentications()) {
@@ -49,7 +50,7 @@ public class ContainerBasedUserAuthenticationFilter extends AuthenticationFilter
         }
         String engineName = getEngineName(request);
         
-        doLogin(authentications, username, engineName);
+        doLogin(authentications, username, engineName, request);
         
         LOGGER.fine(request.getSession().getId() + " " + username + " " + engineName);
       } else {
@@ -57,7 +58,7 @@ public class ContainerBasedUserAuthenticationFilter extends AuthenticationFilter
       }
     }
 
-    protected void doLogin(Authentications authentications, String username, String engineName) {
+    protected void doLogin(Authentications authentications, String username, String engineName, HttpServletRequest request) {
       new ContainerBasedUserAuthenticationResource().doLogin(engineName, username, authentications);
     }
 
