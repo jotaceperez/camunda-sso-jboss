@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <name>Camunda BPM Webapp with SSO for JBoss AS7/Wildfly Server</name>
-    <url>https://github.com/camunda/camunda-sso-jboss</url>
+	<name>Camunda BPM Webapp with SSO for JBoss AS7/Wildfly Server</name>
+	<url>https://github.com/camunda/camunda-sso-jboss</url>
 
-    <groupId>org.camunda.bpm.extension</groupId>
-    <artifactId>camunda-webapp-jboss-sso</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+	<groupId>org.camunda.bpm.extension</groupId>
+	<artifactId>camunda-webapp-jboss-sso</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
 
 	<packaging>war</packaging>
 
-    <properties>
-        <classes.dir>${project.build.directory}/extracted-camunda-webapp</classes.dir>
-        <camunda.version>7.8.0</camunda.version>
-    </properties>
+	<properties>
+		<classes.dir>${project.build.directory}/extracted-camunda-webapp</classes.dir>
+		<camunda.version>7.9.0</camunda.version>
+	</properties>
 
-    <parent>
-        <groupId>org.camunda</groupId>
-        <artifactId>camunda-release-parent</artifactId>
-        <version>2.5</version>
-        <relativePath/>
-    </parent>
+	<parent>
+		<groupId>org.camunda</groupId>
+		<artifactId>camunda-release-parent</artifactId>
+		<version>2.5</version>
+		<relativePath />
+	</parent>
 
 	<dependencies>
 
@@ -44,7 +44,7 @@
 			<groupId>org.camunda.bpm.webapp</groupId>
 			<artifactId>camunda-webapp</artifactId>
 			<version>${camunda.version}</version>
-      <classifier>classes</classifier>
+			<classifier>classes</classifier>
 			<scope>provided</scope>
 		</dependency>
 
@@ -62,6 +62,13 @@
 			<version>${camunda.version}</version>
 			<scope>provided</scope>
 		</dependency>
+
+		<dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-core</artifactId>
+            <version>4.3.0.Final</version>
+            <scope>provided</scope>
+        </dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
@@ -146,9 +153,9 @@
 				<artifactId>maven-war-plugin</artifactId>
 
 				<configuration>
-                    <archive>
-                        <manifestFile>${classes.dir}/META-INF/MANIFEST.MF</manifestFile>
-                    </archive>
+					<archive>
+						<manifestFile>${classes.dir}/META-INF/MANIFEST.MF</manifestFile>
+					</archive>
 					<webResources>
 						<resource>
 							<directory>${classes.dir}</directory>
@@ -160,69 +167,70 @@
 				</configuration>
 			</plugin>
 
-	      <plugin>
-	        <!-- Usage: mvn jboss-as:deploy See also: https://docs.jboss.org/jbossas/7/plugins/maven/latest/examples/deployment-example.html -->
-	        <groupId>org.jboss.as.plugins</groupId>
-	        <artifactId>jboss-as-maven-plugin</artifactId>
-	        <version>7.6.Final</version>
-	      </plugin>
-	      <plugin>
-	        <!-- Usage: mvn wildfly:deploy See also: https://docs.jboss.org/wildfly/plugins/maven/latest/examples/deployment-example.html -->
-	        <groupId>org.wildfly.plugins</groupId>
-	        <artifactId>wildfly-maven-plugin</artifactId>
-	        <version>1.0.2.Final</version>
-	      </plugin>
+			<plugin>
+				<!-- Usage: mvn jboss-as:deploy See also: https://docs.jboss.org/jbossas/7/plugins/maven/latest/examples/deployment-example.html -->
+				<groupId>org.jboss.as.plugins</groupId>
+				<artifactId>jboss-as-maven-plugin</artifactId>
+				<version>7.6.Final</version>
+			</plugin>
+			<plugin>
+				<!-- Usage: mvn wildfly:deploy See also: https://docs.jboss.org/wildfly/plugins/maven/latest/examples/deployment-example.html -->
+				<groupId>org.wildfly.plugins</groupId>
+				<artifactId>wildfly-maven-plugin</artifactId>
+				<version>1.0.2.Final</version>
+			</plugin>
 		</plugins>
 	</build>
 
-    <repositories>
-        <repository>
-            <id>camunda-bpm-nexus</id>
-            <name>camunda-bpm-nexus</name>
-            <url>https://app.camunda.com/nexus/content/groups/public</url>
-        </repository>
-        <repository>
-            <id>jboss-public-repository</id>
-            <name>JBoss Repository</name>
-            <url>http://repository.jboss.org/nexus/content/groups/public</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
+	<repositories>
+		<repository>
+			<id>camunda-bpm-nexus</id>
+			<name>camunda-bpm-nexus</name>
+			<url>https://app.camunda.com/nexus/content/groups/public</url>
+		</repository>
+		<repository>
+			<id>jboss-public-repository</id>
+			<name>JBoss Repository</name>
+			<url>http://repository.jboss.org/nexus/content/groups/public</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 
-    <!-- change to your license -->
-    <licenses>
-        <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-        </license>
-    </licenses>
+	<!-- change to your license -->
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
 
-    <!-- replace YOUR_REPOSITORY_ID with your repository name -->
-    <scm>
-        <connection>scm:git:git@github.com:camunda/camunda-jboss-sso.git</connection>
-        <url>scm:git:git@github.com:camunda/camunda-jboss-sso.git</url>
-        <developerConnection>scm:git:git@github.com:camunda/camunda-jboss-sso.git</developerConnection>
-        <tag>HEAD</tag>
-    </scm>
+	<!-- replace YOUR_REPOSITORY_ID with your repository name -->
+	<scm>
+		<connection>scm:git:git@github.com:camunda/camunda-jboss-sso.git</connection>
+		<url>scm:git:git@github.com:camunda/camunda-jboss-sso.git</url>
+		<developerConnection>scm:git:git@github.com:camunda/camunda-jboss-sso.git</developerConnection>
+		<tag>HEAD</tag>
+	</scm>
 
-    <!-- repositories used for distribution of releases and snapshots, DO NOT CHANGE -->
-    <distributionManagement>
-        <repository>
-            <id>camunda-nexus</id>
-            <name>camunda bpm community extensions</name>
-            <url>https://app.camunda.com/nexus/content/repositories/camunda-bpm-community-extensions</url>
-        </repository>
-        <snapshotRepository>
-            <id>camunda-nexus</id>
-            <name>camunda bpm community extensions snapshots</name>
-            <url>https://app.camunda.com/nexus/content/repositories/camunda-bpm-community-extensions-snapshots</url>
-            <!-- for maven 2 compatibility -->
-            <uniqueVersion>true</uniqueVersion>
-        </snapshotRepository>
-    </distributionManagement>
+	<!-- repositories used for distribution of releases and snapshots, DO NOT 
+		CHANGE -->
+	<distributionManagement>
+		<repository>
+			<id>camunda-nexus</id>
+			<name>camunda bpm community extensions</name>
+			<url>https://app.camunda.com/nexus/content/repositories/camunda-bpm-community-extensions</url>
+		</repository>
+		<snapshotRepository>
+			<id>camunda-nexus</id>
+			<name>camunda bpm community extensions snapshots</name>
+			<url>https://app.camunda.com/nexus/content/repositories/camunda-bpm-community-extensions-snapshots</url>
+			<!-- for maven 2 compatibility -->
+			<uniqueVersion>true</uniqueVersion>
+		</snapshotRepository>
+	</distributionManagement>
 </project>
